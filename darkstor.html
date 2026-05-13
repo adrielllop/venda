@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAINEL DO 7 - Loja Online</title>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --surface2: #1a1a1a;
+            --gold: #d4a853;
+            --gold-light: #f0d078;
+            --accent: #7c3aed;
+            --accent-light: #a78bfa;
+            --text: #e2e2e2;
+            --text-muted: #a0a0a0;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --border: #2a2a2a;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* SPLASH */
+        .splash-screen {
+            position: fixed; inset: 0; z-index: 9999;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0a 70%);
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+            opacity: 1; visibility: visible;
+        }
+        .splash-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .splash-logo {
+            font-size: clamp(3.5rem, 8vw, 7rem); font-weight: 900; letter-spacing: 0.08em;
+            background: linear-gradient(135deg, #f0d078 0%, #d4a853 30%, #b8860b 60%, #f0d078 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 40px rgba(212, 168, 83, 0.5));
+            animation: pulse-gold 1.5s ease-in-out infinite; text-align: center; line-height: 1;
+        }
+        .splash-sub { font-size: 1.2rem; color: #a78bfa; letter-spacing: 0.3em; margin-top: 12px; animation: fadeInUp 0.8s ease forwards; opacity: 0; animation-delay: 0.3s; }
+        .splash-dots { display: flex; gap: 10px; margin-top: 30px; }
+        .splash-dots span { width: 10px; height: 10px; border-radius: 50%; background: var(--gold); animation: bounce-dot 1.2s ease-in-out infinite; }
+        .splash-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .splash-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes pulse-gold {
+            0%, 100% { filter: drop-shadow(0 0 40px rgba(212, 168, 83, 0.5)); }
+            50% { filter: drop-shadow(0 0 80px rgba(240, 208, 120, 0.9)); }
+        }
+        @keyframes bounce-dot {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+            40% { transform: scale(1.4); opacity: 1; }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* HEADER */
+        .header {
+            background: var(--surface); border-bottom: 1px solid var(--border);
+            padding: 16px 32px; display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 100; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+        }
+        .header-logo { font-size: 1.6rem; font-weight: 800; letter-spacing: 0.04em; background: linear-gradient(135deg, #f0d078, #d4a853); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; cursor: pointer; }
+        .header-actions { display: flex; gap: 12px; align-items: center; }
+        .cart-icon {
+            background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+            padding: 10px 16px; border-radius: 30px; cursor: pointer; font-size: 0.95rem;
+            transition: var(--transition); display: flex; align-items: center; gap: 6px;
+        }
+        .cart-icon:hover { border-color: var(--gold); box-shadow: 0 0 20px rgba(212,168,83,0.2); }
+        .cart-count { background: var(--accent); color: #fff; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; }
+        .btn-admin-link {
+            background: transparent; border: 1px solid var(--border); color: var(--text-muted);
+            padding: 10px 16px; border-radius: 30px; cursor: pointer; font-size: 0.85rem;
+            transition: var(--transition); letter-spacing: 0.03em; text-decoration: none;
+        }
+        .btn-admin-link:hover { border-color: var(--accent-light); color: var(--accent-light); box-shadow: 0 0 20px rgba(124,58,237,0.2); }
+
+        /* MAIN */
+        .main-container { max-width: 1300px; margin: 0 auto; padding: 32px 24px; }
+        .store-title { font-size: 2rem; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.02em; }
+        .store-subtitle { color: var(--text-muted); margin-bottom: 32px; font-size: 1rem; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+        .product-card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+            overflow: hidden; transition: var(--transition); cursor: pointer; display: flex; flex-direction: column;
+        }
+        .product-card:hover { transform: translateY(-6px); border-color: #3a3a3a; box-shadow: 0 16px 40px rgba(0,0,0,0.6), 0 0 30px rgba(124,58,237,0.08); }
+        .product-image-wrapper { width: 100%; height: 240px; background: var(--surface2); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .product-image-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .product-card:hover .product-image-wrapper img { transform: scale(1.06); }
+        .product-image-placeholder { font-size: 0rem; color: #3a3a3a; }
+        .product-info { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+        .product-name { font-size: 1.1rem; font-weight: 600; letter-spacing: 0.02em; }
+        .product-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; flex: 1; }
+        .product-price { font-size: 1.5rem; font-weight: 700; background: linear-gradient(135deg, #f0d078, #d4a853); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 0.02em; }
+        .btn-buy {
+            width: 100%; padding: 14px; margin-top: 8px;
+            background: linear-gradient(135deg, #7c3aed, #5b21b6); color: #fff; border: none;
+            border-radius: var(--radius-sm); font-size: 1rem; font-weight: 600; cursor: pointer;
+            letter-spacing: 0.03em; transition: var(--transition); text-transform: uppercase;
+        }
+        .btn-buy:hover { background: linear-gradient(135deg, #8b5cf6, #6d28d9); box-shadow: 0 8px 30px rgba(124,58,237,0.4); transform: translateY(-2px); }
+        .empty-store { text-align: center; padding: 60px; color: var(--text-muted); font-size: 1.1rem; grid-column: 1 / -1; }
+        .loading-spinner { text-align: center; padding: 40px; grid-column: 1 / -1; color: var(--text-muted); font-size: 1.2rem; }
+        .loading-spinner::before { content: "⏳"; font-size: 3rem; display: block; margin-bottom: 10px; animation: bounce-dot 1.2s ease-in-out infinite; }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.75);
+            display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden;
+            transition: var(--transition); backdrop-filter: blur(4px);
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal {
+            background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 40px 32px; text-align: center; max-width: 500px; width: 90%; box-shadow: var(--shadow);
+            transform: translateY(20px); transition: transform 0.4s ease;
+        }
+        .modal-overlay.active .modal { transform: translateY(0); }
+        .modal-icon { font-size: 5rem; margin-bottom: 16px; }
+        .modal h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 8px; background: linear-gradient(135deg, #f0d078, #d4a853); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .modal p { color: var(--text-muted); margin-bottom: 8px; line-height: 1.5; }
+        .modal .highlight { color: var(--success); font-weight: 600; font-size: 1rem; }
+        .btn-close-modal { margin-top: 20px; padding: 12px 36px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 30px; cursor: pointer; font-size: 0.95rem; transition: var(--transition); }
+        .btn-close-modal:hover { border-color: var(--gold); }
+
+        /* TOAST */
+        .toast {
+            position: fixed; bottom: 30px; right: 30px; z-index: 9999;
+            background: var(--surface); border: 1px solid var(--border); padding: 14px 24px;
+            border-radius: 30px; font-weight: 600; font-size: 0.9rem; box-shadow: var(--shadow);
+            opacity: 0; transform: translateY(30px); transition: var(--transition); pointer-events: none;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.success { border-color: var(--success); color: var(--success); }
+        .toast.error { border-color: var(--danger); color: var(--danger); }
+
+        @media (max-width: 768px) {
+            .header { padding: 12px 16px; }
+            .header-logo { font-size: 1.2rem; }
+            .products-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="splash-screen" id="splashScreen">
+        <div class="splash-logo">DARKSTOR</div>
+        <div class="splash-sub">EXCLUSIVO</div>
+        <div class="splash-dots"><span></span><span></span><span></span></div>
+    </div>
+
+    <header class="header">
+        <div class="header-logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">👾 DARKSTOR</div>
+        <div class="header-actions">
+            <a href="admin.html" class="btn-admin-link">🔐 ADMIN</a>
+            <button class="cart-icon" id="cartBtn">🛒 <span class="cart-count" id="cartCount">0</span></button>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <h1 class="store-title">✨ Produtos Exclusivos</h1>
+        <p class="store-subtitle">Os melhores itens selecionados para você no PAINEL DO 7</p>
+        <div class="products-grid" id="productsGrid"><div class="loading-spinner">Carregando produtos...</div></div>
+    </main>
+
+    <div class="modal-overlay" id="modalCompra">
+        <div class="modal">
+            <div class="modal-icon">🎉</div>
+            <h2>Compra Confirmada!</h2>
+            <p id="modalProductName"></p>
+            <p class="highlight">✅ Seu pedido foi registrado com sucesso!</p>
+            <p style="font-size:0.85rem; color:#a0a0a0;">Você será redirecionado para o WhatsApp do vendedor. Obrigado por comprar no <strong>PAINEL DO 7</strong>!</p>
+            <button class="btn-close-modal" onclick="closeModal()">FECHAR</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, collection, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // NOVA CONFIGURAÇÃO DO FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyA9YeujuGrXLNuxVFKrlzD2TScqGeMKtHw",
+            authDomain: "darkstor-80ead.firebaseapp.com",
+            projectId: "darkstor-80ead",
+            storageBucket: "darkstor-80ead.firebasestorage.app",
+            messagingSenderId: "43621257501",
+            appId: "1:43621257501:web:42a0d164355088dd8591f4",
+            measurementId: "G-F3CFLJPX9C"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const produtosRef = collection(db, "produtos");
+        const q = query(produtosRef, orderBy("nome"));
+
+        let produtos = [];
+        let carrinho = JSON.parse(localStorage.getItem('painel_carrinho') || '[]');
+        let whatsappNumber = "";
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => document.getElementById('splashScreen').classList.add('hidden'), 3000);
+        });
+
+        onSnapshot(doc(db, "configuracoes", "whatsapp"), (docSnap) => {
+            whatsappNumber = docSnap.exists() ? docSnap.data().numero || "" : "";
+        });
+
+        onSnapshot(q, (snapshot) => {
+            produtos = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            renderizarLoja();
+        }, (erro) => {
+            document.getElementById('productsGrid').innerHTML = `<div class="empty-store"><span style="font-size:3rem;">⚠️</span><p>Erro ao conectar.</p></div>`;
+        });
+
+        function renderizarLoja() {
+            const grid = document.getElementById('productsGrid');
+            if (produtos.length === 0) {
+                grid.innerHTML = `<div class="empty-store"><span style="font-size:3rem;">📭</span><p>Nenhum produto cadastrado.</p></div>`;
+                return;
+            }
+            grid.innerHTML = produtos.map(p => `
+                <div class="product-card">
+                    <div class="product-image-wrapper">
+                        ${p.imagem?.trim() ? `<img src="${p.imagem}" alt="${p.nome}" onerror="this.parentElement.innerHTML='<span class=\"product-image-placeholder\"></span>'">` : '<span class="product-image-placeholder"></span>'}
+                    </div>
+                    <div class="product-info">
+                        <div class="product-name">${p.nome}</div>
+                        <div class="product-desc">${p.descricao}</div>
+                        <div class="product-price">R$ ${Number(p.preco).toFixed(2).replace('.', ',')}</div>
+                        <button class="btn-buy" onclick="comprar('${p.nome.replace(/'/g, "\\'")}', ${p.preco}, '${(p.imagem || '').replace(/'/g, "\\'")}')">COMPRAR AGORA</button>
+                    </div>
+                </div>
+            `).join('');
+            atualizarCarrinhoUI();
+        }
+
+        window.comprar = function(nome, preco, imagem) {
+            carrinho.push({ nome, preco, data: new Date().toISOString() });
+            localStorage.setItem('painel_carrinho', JSON.stringify(carrinho));
+            atualizarCarrinhoUI();
+
+            document.getElementById('modalProductName').innerHTML = `Você comprou: <strong>${nome}</strong> por <strong>R$ ${Number(preco).toFixed(2).replace('.', ',')}</strong>`;
+            document.getElementById('modalCompra').classList.add('active');
+
+            if (whatsappNumber && whatsappNumber.trim() !== "") {
+                const precoFormatado = Number(preco).toFixed(2).replace('.', ',');
+                let mensagem = `🛒 *NOVO PEDIDO - PAINEL DO 7* 🛒\n\n`;
+                mensagem += `Olá! Tenho interesse em comprar:\n\n`;
+                mensagem += `📦 *Produto:* ${nome}\n`;
+                mensagem += `💰 *Preço:* R$ ${precoFormatado}\n`;
+                if (imagem && imagem.trim() !== "") {
+                    mensagem += `🖼️ *Imagem:* ${imagem}\n`;
+                }
+                mensagem += `\nPor favor, me envie as instruções de pagamento e entrega. Obrigado! 🙏`;
+                
+                const url = `https://wa.me/${whatsappNumber.replace(/\D/g, '')}?text=${encodeURIComponent(mensagem)}`;
+                setTimeout(() => window.open(url, '_blank'), 600);
+                mostrarToast('Redirecionando para WhatsApp...', 'success');
+            } else {
+                mostrarToast('Compra registrada! (WhatsApp não configurado)', 'success');
+            }
+        };
+
+        window.closeModal = () => document.getElementById('modalCompra').classList.remove('active');
+
+        function atualizarCarrinhoUI() {
+            document.getElementById('cartCount').textContent = carrinho.length;
+        }
+
+        function mostrarToast(mensagem, tipo = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = mensagem;
+            toast.className = 'toast ' + tipo + ' show';
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        document.getElementById('cartBtn').addEventListener('click', () => {
+            if (carrinho.length === 0) mostrarToast('Carrinho vazio 🛒', 'error');
+            else {
+                const total = carrinho.reduce((s, i) => s + Number(i.preco), 0);
+                alert(`🛒 Carrinho PAINEL DO 7\n\n${carrinho.map((c, i) => `${i+1}. ${c.nome}`).join('\n')}\n\nTotal: R$ ${total.toFixed(2).replace('.', ',')}`);
+            }
+        });
+
+        document.getElementById('modalCompra').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+    </script>
+</body>
+</html>
